@@ -10,25 +10,37 @@ Main changes in this fork:
 - Added `Scroll mode 2` as a separate low-level touch-scroll mode
 - Added optional trackpad-press mode switching
 - Added optional mouse-mode tap-to-click heuristic
-- Added separate sensitivity controls for cursor mode and `Scroll mode 2`
+- Added separate sensitivity controls for cursor mode, scroll wheel mode, and `Scroll mode 2`
+- Added a persistent mode notification option
 - Removed old per-app settings UI and other stale configuration paths to match the current global-only runtime
 
 ## Features
-- Per-app trackpad mode: Mouse / Keyboard / Scroll Wheel Mode (True scrolling mode)
-- Global default mode + “Apply to all”
-- Scroll wheel customization (sensitivity, invert, horizontal)
-- Auto switch to Keyboard when focusing text inputs (optional, with per-app override and global settings)
-- Hold-key temporary switching - Enable an alternate mode while a key is held (optional, with per-app override and global settings)
-- Quick Toggle Activity - Includes an App Shortcut which can be called upon by KeyMapper app to cycle through available modes
-  - Select which modes Quick Toggle cycles through (Global + Per-App)
-  - Single-Mode Fallback (when only 1 mode is selected)
+- Global mode selection:
+  - Mouse
+  - Keyboard
+  - Scroll wheel
+  - Scroll mode 2
+- Quick toggle cycle selection with single-mode fallback
+- Scroll wheel customization:
+  - sensitivity
+  - invert vertical
+  - invert horizontal
+  - optional horizontal scrolling
+- Separate cursor sensitivity setting
+- Separate `Scroll mode 2` sensitivity setting
+- Optional trackpad press mode switching
+- Optional mouse-mode tap-to-click heuristic
+- Persistent mode notification option
+- Broadcast receiver for smooth Key Mapper integration
 - Backup & restore settings
 - Initial setup helpers (Settings page)
-  - Test / Grant Root Access (`su -c id`) to trigger Magisk/KernelSU prompts and also confirm root works
+  - Test / Grant Root Access (`su -c id`)
   - Guided Accessibility setup (Restricted Settings flow)
 
 ## Download
-- You can download the latest version [here](https://github.com/shroyertech/Q25TrackpadCustomizer/releases/latest)
+- Source: [astroboii47/Q25TrackpadCustomizer](https://github.com/astroboii47/Q25TrackpadCustomizer)
+- Upstream source: [shroyertech/Q25TrackpadCustomizer](https://github.com/shroyertech/Q25TrackpadCustomizer)
+- Releases for this fork should be published [here](https://github.com/astroboii47/Q25TrackpadCustomizer/releases)
 
 ## Setup / Usage
 
@@ -61,42 +73,61 @@ Grant root access in your root manager (KernelSU, Magisk, etc).
 
 ## Quick Toggle
 
-Quick Toggle is an Activity + App Shortcut intended for use with apps like KeyMapper.
+Quick Toggle can be triggered from:
+- the built-in shortcut/activity
+- the broadcast receiver for apps like Key Mapper
+- the trackpad press itself, if you enable that option in Settings
 
-### Mode selection (Global + Per-App)
+### Mode selection
 Choose what Quick Toggle cycles through:
 - Mouse
 - Keyboard
 - Scroll Wheel
-
-You can set this globally, and override it per-app.
+- Scroll mode 2
 
 - If you pick multiple modes, Quick Toggle cycles through only those modes.
-- If only one mode is selected, Quick Toggle cycles between your chosen mode and the current per-app mode. 
-- If the current per-app mode matches your 1 chosen Quick Toggle, it instead uses your chosen Single-Mode Fallback so it doesn’t “do nothing.”
+- If only one mode is selected, Quick Toggle uses the selected Single-Mode Fallback so it doesn’t “do nothing.”
 
 ### Single-Mode Fallback (Global Setting; only applies when only 1 mode is selected)
 Example: Quick Toggle is set to **Keyboard only**
-  - In Mouse/Scroll Wheel mode > Quick Toggle switches to Keyboard
+  - In Mouse/Scroll Wheel/Scroll mode 2 > Quick Toggle switches to Keyboard
   - Already in Keyboard mode > Quick Toggle switches to your selected Fallback mode
 
 ### Default mode is always part of the cycle
-The app’s default/base mode (or system default) is always reachable.
-- Example: Default is Keyboard, you select **only** Mouse for Quick Toggle
-  - Quick Toggle effectively toggles between **Keyboard > Mouse**
+The app’s global default mode is always reachable.
 
 ## Notes
 - This app uses an AccessibilityService to monitor the foreground app and focused views.
 - Scroll wheel mode maps DPAD keys (keyboard mode) to scroll gestures.
+- `Scroll mode 2` uses a low-level helper path and requires root.
+- The current fork is tuned for global/manual mode switching rather than per-app behavior.
 
 ## FAQ
 
-### Why did scroll wheel mode / per app settings stop working after updating?
+### Why did mode switching or scrolling stop working after updating?
 You need to re-enable the Accessibility Service after updating:
 - **Settings > Accessibility > Q25 Trackpad Customizer > Enable**
 
 ### How can I disable the pop ups when it switches modes?
-You can disable toasts individually on the Settings page, near the top. Uncheck any toast categories you don’t want.
+You can disable toasts individually on the Settings page, or enable the persistent mode notification instead.
+
+### How do I use this with Key Mapper?
+Use the broadcast receiver action:
+
+`tech.shroyer.q25trackpadcustomizer.action.QUICK_TOGGLE`
+
+Package:
+
+`tech.shroyer.q25trackpadcustomizer`
+
+Receiver/class:
+
+`tech.shroyer.q25trackpadcustomizer.QuickToggleReceiver`
+
+This is lighter than launching the activity-based shortcut.
+
+### What is Scroll mode 2?
+`Scroll mode 2` is the low-level touch-scroll mode added in this fork. It is intended to feel more like direct screen swiping than the original scroll wheel mode.
 
 ### Why doesn’t Magisk prompt me to allow root?
 Magisk typically prompts only when the app actually runs `su`. Use:
