@@ -2,6 +2,17 @@
 
 Android app (Accessibility Service) for Zinwa Q25.
 
+## Fork note
+
+This repository is a custom fork of [shroyertech/Q25TrackpadCustomizer](https://github.com/shroyertech/Q25TrackpadCustomizer), based on the latest upstream release at the time this fork was started.
+
+Main changes in this fork:
+- Added `Scroll mode 2` as a separate low-level touch-scroll mode
+- Added optional trackpad-press mode switching
+- Added optional mouse-mode tap-to-click heuristic
+- Added separate sensitivity controls for cursor mode and `Scroll mode 2`
+- Removed old per-app settings UI and other stale configuration paths to match the current global-only runtime
+
 ## Features
 - Per-app trackpad mode: Mouse / Keyboard / Scroll Wheel Mode (True scrolling mode)
 - Global default mode + “Apply to all”

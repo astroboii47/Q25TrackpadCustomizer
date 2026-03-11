@@ -8,7 +8,8 @@ enum class Mode(val prefValue: Int, val procValue: String?) {
     MOUSE(0, "0"),
     KEYBOARD(1, "1"),
     FOLLOW_SYSTEM(2, null),
-    SCROLL_WHEEL(3, "1");
+    SCROLL_WHEEL(3, "1"),
+    SCROLL_MODE_2(4, "0");
 
     companion object {
 
@@ -18,6 +19,7 @@ enum class Mode(val prefValue: Int, val procValue: String?) {
                 1 -> KEYBOARD
                 2 -> FOLLOW_SYSTEM
                 3 -> SCROLL_WHEEL
+                4 -> SCROLL_MODE_2
                 else -> MOUSE
             }
         }

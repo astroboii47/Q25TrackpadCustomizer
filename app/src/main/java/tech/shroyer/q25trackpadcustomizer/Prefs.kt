@@ -21,6 +21,32 @@ class Prefs(context: Context) {
         prefs.edit().putInt(KEY_SYSTEM_DEFAULT_MODE, mode.prefValue).apply()
     }
 
+    fun getGlobalCursorSensitivity(): CursorSensitivity {
+        val value = prefs.getInt(KEY_CURSOR_GLOBAL_SENS, CursorSensitivity.MEDIUM.prefValue)
+        return CursorSensitivity.fromPrefValue(value)
+    }
+
+    fun setGlobalCursorSensitivity(sensitivity: CursorSensitivity) {
+        prefs.edit().putInt(KEY_CURSOR_GLOBAL_SENS, sensitivity.prefValue).apply()
+    }
+
+    fun getGlobalScrollMode2Sensitivity(): ScrollSensitivity {
+        val value = prefs.getInt(KEY_SCROLL_MODE2_GLOBAL_SENS, ScrollSensitivity.MEDIUM.prefValue)
+        return ScrollSensitivity.fromPrefValue(value)
+    }
+
+    fun setGlobalScrollMode2Sensitivity(sensitivity: ScrollSensitivity) {
+        prefs.edit().putInt(KEY_SCROLL_MODE2_GLOBAL_SENS, sensitivity.prefValue).apply()
+    }
+
+    fun isTrackpadPressModeSwitchEnabled(): Boolean {
+        return prefs.getBoolean(KEY_TRACKPAD_PRESS_MODE_SWITCH, true)
+    }
+
+    fun setTrackpadPressModeSwitchEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_TRACKPAD_PRESS_MODE_SWITCH, enabled).apply()
+    }
+
     // ---- Last-known logical mode ----
     // Avoids ambiguous /proc reads and improves restore reliability.
 
@@ -76,8 +102,15 @@ class Prefs(context: Context) {
         prefs.edit().putBoolean(KEY_TOAST_HOLD_KEY, enabled).apply()
     }
 
+    fun isModeStatusNotificationEnabled(): Boolean =
+        prefs.getBoolean(KEY_MODE_STATUS_NOTIFICATION, false)
+
+    fun setModeStatusNotificationEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_MODE_STATUS_NOTIFICATION, enabled).apply()
+    }
+
     // ---- Quick Toggle mode selection (global + per-app overrides) ----
-    // Stored as a bitmask: MOUSE=1, KEYBOARD=2, SCROLL_WHEEL=4.
+    // Stored as a bitmask: MOUSE=1, KEYBOARD=2, SCROLL_WHEEL=4, SCROLL_MODE_2=8.
 
     fun getGlobalQuickToggleModes(): Set<Mode> {
         val mask = prefs.getInt(KEY_QUICK_TOGGLE_MODES_GLOBAL, QUICK_TOGGLE_DEFAULT_MASK)
@@ -136,14 +169,14 @@ class Prefs(context: Context) {
         val value = prefs.getInt(KEY_QUICK_TOGGLE_SINGLE_MATCH_FALLBACK, Mode.MOUSE.prefValue)
         val m = Mode.fromPrefValue(value)
         return when (m) {
-            Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL -> m
+            Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL, Mode.SCROLL_MODE_2 -> m
             else -> Mode.MOUSE
         }
     }
 
     fun setGlobalQuickToggleSingleMatchFallbackMode(mode: Mode) {
         val safe = when (mode) {
-            Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL -> mode
+            Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL, Mode.SCROLL_MODE_2 -> mode
             else -> Mode.MOUSE
         }
         prefs.edit().putInt(KEY_QUICK_TOGGLE_SINGLE_MATCH_FALLBACK, safe.prefValue).apply()
@@ -606,7 +639,7 @@ class Prefs(context: Context) {
         val out = LinkedHashSet<Mode>()
         for (m in modes) {
             when (m) {
-                Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL -> out.add(m)
+                Mode.MOUSE, Mode.KEYBOARD, Mode.SCROLL_WHEEL, Mode.SCROLL_MODE_2 -> out.add(m)
                 else -> Unit
             }
         }
@@ -620,6 +653,7 @@ class Prefs(context: Context) {
                 Mode.MOUSE -> QUICK_TOGGLE_MASK_MOUSE
                 Mode.KEYBOARD -> QUICK_TOGGLE_MASK_KEYBOARD
                 Mode.SCROLL_WHEEL -> QUICK_TOGGLE_MASK_SCROLL
+                Mode.SCROLL_MODE_2 -> QUICK_TOGGLE_MASK_SCROLL_2
                 else -> 0
             }
         }
@@ -631,6 +665,7 @@ class Prefs(context: Context) {
         if ((mask and QUICK_TOGGLE_MASK_MOUSE) != 0) out.add(Mode.MOUSE)
         if ((mask and QUICK_TOGGLE_MASK_KEYBOARD) != 0) out.add(Mode.KEYBOARD)
         if ((mask and QUICK_TOGGLE_MASK_SCROLL) != 0) out.add(Mode.SCROLL_WHEEL)
+        if ((mask and QUICK_TOGGLE_MASK_SCROLL_2) != 0) out.add(Mode.SCROLL_MODE_2)
         return out
     }
 
@@ -647,6 +682,7 @@ class Prefs(context: Context) {
         private const val KEY_TOAST_PER_APP = "toast_per_app"
         private const val KEY_TOAST_DEFAULT_MODE = "toast_default_mode"
         private const val KEY_TOAST_HOLD_KEY = "toast_hold_key"
+        private const val KEY_MODE_STATUS_NOTIFICATION = "mode_status_notification"
 
         // Quick Toggle selection
         private const val KEY_QUICK_TOGGLE_MODES_GLOBAL = "quick_toggle_modes_global"
@@ -656,6 +692,7 @@ class Prefs(context: Context) {
         private const val QUICK_TOGGLE_MASK_MOUSE = 1
         private const val QUICK_TOGGLE_MASK_KEYBOARD = 2
         private const val QUICK_TOGGLE_MASK_SCROLL = 4
+        private const val QUICK_TOGGLE_MASK_SCROLL_2 = 8
         private const val QUICK_TOGGLE_DEFAULT_MASK =
             QUICK_TOGGLE_MASK_MOUSE or QUICK_TOGGLE_MASK_KEYBOARD or QUICK_TOGGLE_MASK_SCROLL
 
@@ -699,6 +736,9 @@ class Prefs(context: Context) {
         private const val KEY_SCROLL_GLOBAL_HORIZONTAL = "scroll_global_horizontal"
         private const val KEY_SCROLL_GLOBAL_INV_V = "scroll_global_inv_v"
         private const val KEY_SCROLL_GLOBAL_INV_H = "scroll_global_inv_h"
+        private const val KEY_CURSOR_GLOBAL_SENS = "cursor_global_sens"
+        private const val KEY_SCROLL_MODE2_GLOBAL_SENS = "scroll_mode2_global_sens"
+        private const val KEY_TRACKPAD_PRESS_MODE_SWITCH = "trackpad_press_mode_switch"
 
         private const val PREFIX_SCROLL_APP = "scroll_app_"
         private fun keyScrollAppSens(pkg: String) = "scroll_app_sens_$pkg"

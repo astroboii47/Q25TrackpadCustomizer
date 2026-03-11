@@ -1,11 +1,15 @@
 package tech.shroyer.q25trackpadcustomizer
 
+import android.content.Context
+import android.content.Intent
 import java.io.IOException
 
 // Handle reading and writing /proc/q20_switch_key_mouse using root
 object TrackpadController {
 
     private const val PROC_PATH = "/proc/q20_switch_key_mouse"
+    private const val POINTER_SPEED_SETTING = "pointer_speed"
+    private const val HELPER_BINARY_MATCH = "trackpad_helper"
 
     /**
      * Toggle between 0 and 1 and return the new Mode if successful.
@@ -34,22 +38,40 @@ object TrackpadController {
     }
 
     /**
-     * Set the mode explicitly (MOUSE, KEYBOARD, or SCROLL_WHEEL).
+     * Set the mode explicitly.
      * FOLLOW_SYSTEM is resolved before calling this.
      *
-     * Both KEYBOARD and SCROLL_WHEEL use the same hardware mode (1),
-     * but SCROLL_WHEEL is treated differently at the Accessibility layer.
+     * KEYBOARD and SCROLL_WHEEL use hardware mode 1.
+     * SCROLL_MODE_2 uses hardware mode 0 so raw relative motion remains available.
      */
-    fun setModeValue(mode: Mode): Boolean {
+    fun setModeValue(mode: Mode, context: Context? = null): Boolean {
+        val previousMode = AppState.currentMode
         val procValue = when (mode) {
             Mode.MOUSE -> "0"
             Mode.KEYBOARD, Mode.SCROLL_WHEEL -> "1"
+            Mode.SCROLL_MODE_2 -> "0"
             Mode.FOLLOW_SYSTEM -> return false
         }
 
-        val success = writeValue(procValue)
+        if (previousMode == mode && (mode != Mode.SCROLL_MODE_2 || AppState.scrollMode2HelperRunning)) {
+            return true
+        }
+
+        val currentProcValue = readValue()
+        val success = if (currentProcValue == procValue) {
+            true
+        } else {
+            writeValue(procValue)
+        }
         if (success) {
             AppState.currentMode = mode
+            if (context != null) {
+                requestHelperRefresh(
+                    context = context,
+                    mode = mode,
+                    forceStopScrollMode2 = false
+                )
+            }
         }
         return success
     }
@@ -64,12 +86,25 @@ object TrackpadController {
         return if (trimmed == "0" || trimmed == "1") trimmed else null
     }
 
+    fun applyCursorSensitivity(sensitivity: CursorSensitivity): Boolean {
+        val (ok, _) = execSu("settings put system $POINTER_SPEED_SETTING ${sensitivity.pointerSpeed}")
+        return ok
+    }
+
     /**
      * Write a value ("0" or "1") to /proc using su
      */
     private fun writeValue(value: String): Boolean {
         val (ok, _) = execSu("echo $value > $PROC_PATH")
         return ok
+    }
+
+    private fun requestHelperRefresh(context: Context, mode: Mode, forceStopScrollMode2: Boolean) {
+        val intent = Intent(AppSwitchService.ACTION_REFRESH_HELPER_STATE)
+            .setPackage(context.packageName)
+            .putExtra(AppSwitchService.EXTRA_TARGET_MODE, mode.prefValue)
+            .putExtra(AppSwitchService.EXTRA_FORCE_STOP_SCROLL_MODE_2, forceStopScrollMode2)
+        context.sendBroadcast(intent)
     }
 
     /**

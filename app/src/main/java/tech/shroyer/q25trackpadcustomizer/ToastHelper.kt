@@ -1,18 +1,17 @@
 package tech.shroyer.q25trackpadcustomizer
 
 import android.content.Context
-import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 
-// Centralize toast display by launching ToastActivity in its own task,
-// so toasts always behave consistently without bringing the main UI to front.
+// Use app-context toasts directly to avoid the overhead of launching a headless activity.
 object ToastHelper {
 
     fun show(context: Context, text: String) {
         val appContext = context.applicationContext
-        val intent = Intent(appContext, ToastActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(ToastActivity.EXTRA_MESSAGE, text)
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(appContext, text, Toast.LENGTH_SHORT).show()
         }
-        appContext.startActivity(intent)
     }
 }

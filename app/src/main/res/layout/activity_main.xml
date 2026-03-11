@@ -45,49 +45,12 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp" />
 
-    <!-- Set all apps to... -->
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
-
-        <Spinner
-            android:id="@+id/spinnerSetAllMode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/btnSetAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Apply to all" />
-    </LinearLayout>
-
-    <!-- Search bar -->
-    <EditText
-        android:id="@+id/editSearch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="4dp"
-        android:hint="Search apps..."
-        android:singleLine="true" />
-
     <TextView
-        android:id="@+id/tvPerAppLabel"
+        android:id="@+id/tvGlobalModeInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Per-app settings"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        android:layout_marginBottom="2dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerApps"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_marginTop="8dp"
+        android:text="This app now uses one global mode and one global quick-toggle cycle. Per-app mode switching has been removed."
+        android:textSize="13sp" />
 
 </LinearLayout>

@@ -40,6 +40,14 @@
             android:taskAffinity="tech.shroyer.q25trackpadcustomizer.QuickToggle"
             android:launchMode="singleTask" />
 
+        <receiver
+            android:name=".QuickToggleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="tech.shroyer.q25trackpadcustomizer.action.QUICK_TOGGLE" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".ShortcutActivity"
             android:exported="true">

@@ -2,6 +2,8 @@ package tech.shroyer.q25trackpadcustomizer
 
 // Set how strong the scroll effect is for each key press
 enum class ScrollSensitivity(val prefValue: Int, val steps: Int) {
+    ULTRA_SLOW(3, 1),
+    VERY_SLOW(4, 1),
     SLOW(0, 1),
     MEDIUM(1, 2),
     FAST(2, 3);

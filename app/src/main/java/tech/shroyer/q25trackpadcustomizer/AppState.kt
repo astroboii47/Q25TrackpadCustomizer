@@ -17,6 +17,9 @@ object AppState {
     @Volatile
     var rootErrorShown: Boolean = false
 
+    @Volatile
+    var scrollMode2HelperRunning: Boolean = false
+
     // ---- Text-input override ----
 
     @Volatile
